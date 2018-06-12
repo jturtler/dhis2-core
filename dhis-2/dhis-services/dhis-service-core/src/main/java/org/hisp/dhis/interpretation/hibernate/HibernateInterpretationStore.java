@@ -36,6 +36,8 @@ import org.hisp.dhis.interpretation.InterpretationStore;
 import org.hisp.dhis.mapping.Map;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.user.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 
@@ -45,6 +47,9 @@ import java.util.List;
 public class HibernateInterpretationStore
     extends HibernateIdentifiableObjectStore<Interpretation> implements InterpretationStore
 {
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @SuppressWarnings("unchecked")
     public List<Interpretation> getInterpretations( User user )
     {
@@ -96,6 +101,17 @@ public class HibernateInterpretationStore
         query.setEntity( "reportTable", reportTable );
 
         return ((Long) query.uniqueResult()).intValue();
+    }
+
+    @Override
+    public long getUnreadInterpretationsCount( User user )
+    {
+        String sql = "select count(*) from interpretation AS i where " +
+            "(i.interpretationid in (select i.interpretationid from intepretation_likedby where i.userid =" + user.getId() + ") " +
+            "or i.mentions @> '[{\"username\": \"" + user.getUsername() + "\"}]'::jsonb) " +
+            "and i.lastupdated > (select lastcheckedinterpretations from userinfo where userinfoid = " + user.getId() + ")";
+
+        return (long) jdbcTemplate.queryForList( sql ).get( 0 ).get( "count" );
     }
 
     @Override

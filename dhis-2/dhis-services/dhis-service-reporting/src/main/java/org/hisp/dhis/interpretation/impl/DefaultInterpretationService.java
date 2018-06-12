@@ -30,6 +30,8 @@ package org.hisp.dhis.interpretation.impl;
 
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.CodeGenerator;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.interpretation.Interpretation;
 import org.hisp.dhis.interpretation.InterpretationComment;
 import org.hisp.dhis.interpretation.InterpretationService;
@@ -46,8 +48,6 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAccess;
 import org.hisp.dhis.user.UserService;
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.i18n.I18nManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -322,7 +322,7 @@ public class DefaultInterpretationService
 
         if ( user != null && user.getLastCheckedInterpretations() != null )
         {
-            count = interpretationStore.getCountGeLastUpdated( user.getLastCheckedInterpretations() );
+            count = interpretationStore.getUnreadInterpretationsCount( user );
         }
         else
         {
